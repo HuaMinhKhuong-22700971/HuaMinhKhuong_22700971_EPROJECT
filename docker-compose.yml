@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # === 1. API GATEWAY ===
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+    depends_on:
+      - auth
+      - product
+      - order
+    networks:
+      - microservice-net
+
+  # === 2. AUTH SERVICE ===
+  auth:
+    build: ./auth
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./auth/.env
+    depends_on:
+      - auth-db
+    networks:
+      - microservice-net
+
+  # === 3. PRODUCT SERVICE ===
+  product:
+    build: ./product
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./product/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      product-db:
+        condition: service_started
+    restart: always
+    networks:
+      - microservice-net
+
+  # === 4. ORDER SERVICE ===
+  order:
+    build: ./order
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./order/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      order-db:
+        condition: service_started
+    restart: always
+    networks:
+      - microservice-net
+
+  # === 5. RABBITMQ ===
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - microservice-net
+
+  # === 6. DATABASES ===
+  auth-db:
+    image: mongo:latest
+    container_name: auth-db
+    ports:
+      - "27018:27017"
+    volumes:
+      - auth-db-data:/data/db
+    networks:
+      - microservice-net
+
+  product-db:
+    image: mongo:latest
+    container_name: product-db
+    ports:
+      - "27019:27017"
+    volumes:
+      - product-db-data:/data/db
+    networks:
+      - microservice-net
+
+  order-db:
+    image: mongo:latest
+    container_name: order-db
+    ports:
+      - "27020:27017"
+    volumes:
+      - order-db-data:/data/db
+    networks:
+      - microservice-net
+
+volumes:
+  auth-db-data:
+  product-db-data:
+  order-db-data:
+
+networks:
+  microservice-net:
+    driver: bridge

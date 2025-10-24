@@ -1,0 +1,13 @@
+# Thư mục chứa các gói phụ thuộc (dependencies)
+node_modules/
+
+# Thư mục cấu hình IDE/Editor (như VSCode)
+.vscode/
+
+# Tệp khóa gói (package-lock.json và yarn.lock) có thể cần, nhưng đôi khi cũng bỏ qua tùy dự án
+# package-lock.json 
+# yarn.lock
+
+# Các tệp tạm thời khác
+*.log
+.env
