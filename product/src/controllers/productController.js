@@ -10,7 +10,6 @@ class ProductController {
     this.createOrder = this.createOrder.bind(this);
     this.getOrderStatus = this.getOrderStatus.bind(this);
     this.getProductById = this.getProductById.bind(this);
-
     // Bộ nhớ tạm lưu trạng thái order
     this.ordersMap = new Map();
   }
@@ -102,18 +101,17 @@ class ProductController {
 
     res.status(200).json(order);
   }
-
-  // Lấy sản phẩm theo ID
-async getProductById(req, res) {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
+  //Lấy thông tin sản phẩm
+  async getProductById(req, res) {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+      res.json(product);
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
+    }
   }
-}
-
+  
 }
 
 module.exports = ProductController;
